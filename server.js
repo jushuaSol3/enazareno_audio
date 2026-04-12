@@ -9,6 +9,7 @@ const PORT = process.env.PORT || 5000
 
 app.use(cors());
 app.use(express.json());
+app.use('/finalizedvoice-over', express.static('finalizedvoice-over'));
 
 // ── Load book data ───────────────────────────────────────────
 let bookData = [];
