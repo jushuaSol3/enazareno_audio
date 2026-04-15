@@ -11,7 +11,7 @@ app.use(cors());
 app.use(express.json());
 app.use('/finalizedvoice-over', express.static('finalizedvoice-over'));
 
-// ── Load book data ───────────────────────────────────────────
+
 let bookData = [];
 try {
     bookData = require('./openBook.json');
@@ -22,32 +22,31 @@ try {
 }
 
 
-// ── Audio stream endpoint (preface audio) ────────────────────────────────────
+
 app.get('/api/audio/:bookId', (req, res) => {
     const bookId = parseInt(req.params.bookId);
     console.log(`\n📥 Request for bookId: ${bookId}`);
 
-    // 1. Find the book
+
     const book = bookData.find(b => b.id === bookId);
     if (!book) {
         console.error(`❌ No book found with id ${bookId}`);
         return res.status(404).json({ success: false, message: 'Book not found.' });
     }
 
-    // 2. Get the raw audio path from JSON
+
     const rawAudioPath = book.preface.audio;
     console.log(`📄 Raw path from JSON: "${rawAudioPath}"`);
 
-    // 3. Strip "./" prefix and build the absolute path
-    //    __dirname = the folder where server.js lives (your backend/ folder)
+
     const cleanedPath = rawAudioPath.replace(/^\.\//, '');
     const filePath = path.join(__dirname, cleanedPath);
     console.log(`📂 Resolved absolute path: "${filePath}"`);
 
-    // 4. Check if the file exists
+
     if (!fs.existsSync(filePath)) {
         console.error(`❌ File NOT found at: "${filePath}"`);
-        // Log what IS in the finalized voice-over folder to help debug
+
         const voiceOverDir = path.join(__dirname, 'finalized voice-over');
         if (fs.existsSync(voiceOverDir)) {
             console.log('📁 Contents of "finalized voice-over":');
@@ -64,7 +63,7 @@ app.get('/api/audio/:bookId', (req, res) => {
 
     console.log(`✅ File found! Streaming...`);
 
-    // 5. Stream with Range support (required for browser seek)
+
     const stat = fs.statSync(filePath);
     const fileSize = stat.size;
     const range = req.headers.range;
@@ -96,28 +95,28 @@ app.get('/api/audio/:bookId', (req, res) => {
     }
 });
 
-// ── Story audio endpoint ─────────────────────────────────────
+
 app.get('/api/audio/:bookId/story', (req, res) => {
     const bookId = parseInt(req.params.bookId);
     console.log(`\n📥 Request for story audio, bookId: ${bookId}`);
 
-    // 1. Find the book
+
     const book = bookData.find(b => b.id === bookId);
     if (!book) {
         console.error(`❌ No book found with id ${bookId}`);
         return res.status(404).json({ success: false, message: 'Book not found.' });
     }
 
-    // 2. Get the raw story audio path from JSON (book.audio, not book.preface.audio)
+
     const rawAudioPath = book.audio;
     console.log(`📄 Raw story path from JSON: "${rawAudioPath}"`);
 
-    // 3. Strip "./" prefix and build the absolute path
+
     const cleanedPath = rawAudioPath.replace(/^\.\//, '');
     const filePath = path.join(__dirname, cleanedPath);
     console.log(`📂 Resolved absolute path: "${filePath}"`);
 
-    // 4. Check if the file exists
+
     if (!fs.existsSync(filePath)) {
         console.error(`❌ Story file NOT found at: "${filePath}"`);
         const voiceOverDir = path.join(__dirname, 'finalized voice-over');
@@ -136,7 +135,7 @@ app.get('/api/audio/:bookId/story', (req, res) => {
 
     console.log(`✅ Story file found! Streaming...`);
 
-    // 5. Stream with Range support (required for browser seek)
+
     const stat = fs.statSync(filePath);
     const fileSize = stat.size;
     const range = req.headers.range;
@@ -168,8 +167,7 @@ app.get('/api/audio/:bookId/story', (req, res) => {
     }
 });
 
-// ── Test route ───────────────────────────────────────────────
-// Visit http://localhost:5000/api/test in your browser to verify setup
+
 app.get('/api/test', (req, res) => {
     const voiceOverDir = path.join(__dirname, 'finalized voice-over');
     const exists = fs.existsSync(voiceOverDir);
@@ -184,8 +182,5 @@ app.get('/api/test', (req, res) => {
 });
 
 app.listen(PORT, () => {
-    console.log(`\n🚀 Server running at http://localhost:${PORT}`);
-    console.log(`🔍 Test it: http://localhost:${PORT}/api/test`);
-    console.log(`🔍 Book 1 preface audio: http://localhost:${PORT}/api/audio/1`);
-    console.log(`🔍 Book 1 story audio: http://localhost:${PORT}/api/audio/1/story\n`);
+    console.log(`\n Server running at http://localhost:${PORT}`);
 });
