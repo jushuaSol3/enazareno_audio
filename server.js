@@ -15,9 +15,9 @@ app.use('/finalizedvoice-over', express.static('finalizedvoice-over'));
 let bookData = [];
 try {
     bookData = require('./openBook.json');
-    console.log(`✅ openBook.json loaded — ${bookData.length} books found`);
+    console.log(` openBook.json loaded — ${bookData.length} books found`);
 } catch (err) {
-    console.error('❌ Failed to load openBook.json:', err.message);
+    console.error(' Failed to load openBook.json:', err.message);
     console.error('   Make sure openBook.json is in the same folder as server.js');
 }
 
@@ -25,34 +25,33 @@ try {
 
 app.get('/api/audio/:bookId', (req, res) => {
     const bookId = parseInt(req.params.bookId);
-    console.log(`\n📥 Request for bookId: ${bookId}`);
+
 
 
     const book = bookData.find(b => b.id === bookId);
     if (!book) {
-        console.error(`❌ No book found with id ${bookId}`);
         return res.status(404).json({ success: false, message: 'Book not found.' });
     }
 
 
     const rawAudioPath = book.preface.audio;
-    console.log(`📄 Raw path from JSON: "${rawAudioPath}"`);
+    console.log(`Raw path from JSON: "${rawAudioPath}"`);
 
 
     const cleanedPath = rawAudioPath.replace(/^\.\//, '');
     const filePath = path.join(__dirname, cleanedPath);
-    console.log(`📂 Resolved absolute path: "${filePath}"`);
+    console.log(` Resolved absolute path: "${filePath}"`);
 
 
     if (!fs.existsSync(filePath)) {
-        console.error(`❌ File NOT found at: "${filePath}"`);
+        console.error(`File NOT found at: "${filePath}"`);
 
         const voiceOverDir = path.join(__dirname, 'finalized voice-over');
         if (fs.existsSync(voiceOverDir)) {
-            console.log('📁 Contents of "finalized voice-over":');
+
             fs.readdirSync(voiceOverDir).forEach(f => console.log('   -', f));
         } else {
-            console.error(`❌ "finalized voice-over" folder not found at: "${voiceOverDir}"`);
+            console.error(` "finalized voice-over" folder not found at: "${voiceOverDir}"`);
         }
         return res.status(404).json({
             success: false,
@@ -61,7 +60,7 @@ app.get('/api/audio/:bookId', (req, res) => {
         });
     }
 
-    console.log(`✅ File found! Streaming...`);
+    console.log(` File found! Streaming...`);
 
 
     const stat = fs.statSync(filePath);
@@ -74,7 +73,7 @@ app.get('/api/audio/:bookId', (req, res) => {
         const end = endStr ? parseInt(endStr, 10) : fileSize - 1;
         const chunkSize = end - start + 1;
 
-        console.log(`📡 Streaming range: bytes ${start}-${end}/${fileSize}`);
+
 
         res.writeHead(206, {
             'Content-Range': `bytes ${start}-${end}/${fileSize}`,
@@ -98,33 +97,33 @@ app.get('/api/audio/:bookId', (req, res) => {
 
 app.get('/api/audio/:bookId/story', (req, res) => {
     const bookId = parseInt(req.params.bookId);
-    console.log(`\n📥 Request for story audio, bookId: ${bookId}`);
+
 
 
     const book = bookData.find(b => b.id === bookId);
     if (!book) {
-        console.error(`❌ No book found with id ${bookId}`);
+        console.error(` No book found with id ${bookId}`);
         return res.status(404).json({ success: false, message: 'Book not found.' });
     }
 
 
     const rawAudioPath = book.audio;
-    console.log(`📄 Raw story path from JSON: "${rawAudioPath}"`);
+    console.log(` Raw story path: "${rawAudioPath}"`);
 
 
     const cleanedPath = rawAudioPath.replace(/^\.\//, '');
     const filePath = path.join(__dirname, cleanedPath);
-    console.log(`📂 Resolved absolute path: "${filePath}"`);
+    console.log(`Resolved absolute path: "${filePath}"`);
 
 
     if (!fs.existsSync(filePath)) {
-        console.error(`❌ Story file NOT found at: "${filePath}"`);
+        console.error(` Story file NOT found at: "${filePath}"`);
         const voiceOverDir = path.join(__dirname, 'finalized voice-over');
         if (fs.existsSync(voiceOverDir)) {
-            console.log('📁 Contents of "finalized voice-over":');
+            console.log(' Contents of "finalized voice-over":');
             fs.readdirSync(voiceOverDir).forEach(f => console.log('   -', f));
         } else {
-            console.error(`❌ "finalized voice-over" folder not found at: "${voiceOverDir}"`);
+            console.error(`"finalized voice-over" folder not found at: "${voiceOverDir}"`);
         }
         return res.status(404).json({
             success: false,
@@ -133,7 +132,7 @@ app.get('/api/audio/:bookId/story', (req, res) => {
         });
     }
 
-    console.log(`✅ Story file found! Streaming...`);
+
 
 
     const stat = fs.statSync(filePath);
@@ -146,7 +145,6 @@ app.get('/api/audio/:bookId/story', (req, res) => {
         const end = endStr ? parseInt(endStr, 10) : fileSize - 1;
         const chunkSize = end - start + 1;
 
-        console.log(`📡 Streaming range: bytes ${start}-${end}/${fileSize}`);
 
         res.writeHead(206, {
             'Content-Range': `bytes ${start}-${end}/${fileSize}`,
@@ -156,7 +154,7 @@ app.get('/api/audio/:bookId/story', (req, res) => {
         });
         fs.createReadStream(filePath, { start, end }).pipe(res);
     } else {
-        console.log(`📡 Streaming full file (${fileSize} bytes)`);
+        console.log(` Streaming full file (${fileSize} bytes)`);
 
         res.writeHead(200, {
             'Content-Length': fileSize,
