@@ -39,7 +39,7 @@ function getStoryAudio(req, res) {
 
 // ── Test handler ──────────────────────────────────────────────
 function getTest(req, res) {
-    const voiceOverDir = path.join(__dirname, '..', 'finalized voice-over');
+    const voiceOverDir = path.join(__dirname, 'finalizedvoice-over');
     const exists = fs.existsSync(voiceOverDir);
     const files = exists ? fs.readdirSync(voiceOverDir) : [];
     res.json({
